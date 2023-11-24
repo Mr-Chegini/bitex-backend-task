@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -7,6 +7,7 @@ import { UsersModule } from './users/users.module';
 import { NotesModule } from './notes/notes.module';
 import { APP_FILTER } from '@nestjs/core';
 import { QueryExceptionFilter } from './common/exception-filters/query-exception.filter';
+import { LoggerMiddleware } from './common/middlewares/logger.middleware';
 
 @Module({
   imports: [
@@ -33,8 +34,13 @@ import { QueryExceptionFilter } from './common/exception-filters/query-exception
     NotesModule,
   ],
   controllers: [AppController],
-  providers: [AppService,
-    { provide: APP_FILTER, useClass: QueryExceptionFilter }
+  providers: [
+    AppService,
+    { provide: APP_FILTER, useClass: QueryExceptionFilter },
   ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(LoggerMiddleware).forRoutes('*');
+  }
+}

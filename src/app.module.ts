@@ -5,6 +5,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsersModule } from './users/users.module';
 import { NotesModule } from './notes/notes.module';
+import { APP_FILTER } from '@nestjs/core';
+import { QueryExceptionFilter } from './common/exception-filters/query-exception.filter';
 
 @Module({
   imports: [
@@ -31,6 +33,8 @@ import { NotesModule } from './notes/notes.module';
     NotesModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService,
+    { provide: APP_FILTER, useClass: QueryExceptionFilter }
+  ],
 })
 export class AppModule {}

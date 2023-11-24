@@ -4,6 +4,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { Repository } from 'typeorm';
+import { hashPassword } from 'src/common/utils/password';
 
 @Injectable()
 export class UsersService {
@@ -13,7 +14,11 @@ export class UsersService {
   ) {}
 
   async register(registerUserDto: RegisterUserDto): Promise<void> {
-    const user = await this.usersRepository.save(registerUserDto);
+    const { username, password } = registerUserDto;
+    const user = await this.usersRepository.save({
+      username,
+      password: await hashPassword(password),
+    });
   }
 
   findAll() {

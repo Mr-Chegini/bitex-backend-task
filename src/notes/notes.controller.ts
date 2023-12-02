@@ -1,9 +1,27 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from '@nestjs/common';
 import { NotesService } from './notes.service';
 import { CreateNoteDto } from './dto/create-note.dto';
 import { UpdateNoteDto } from './dto/update-note.dto';
+import {
+  ApiBearerAuth,
+  ApiInternalServerErrorResponse,
+  ApiTags,
+  ApiUnauthorizedResponse,
+} from '@nestjs/swagger';
 
 @Controller('notes')
+@ApiTags('notes')
+@ApiInternalServerErrorResponse({ description: 'internal server error.' })
+@ApiUnauthorizedResponse({ description: 'unauthorized' })
+@ApiBearerAuth('access-token')
 export class NotesController {
   constructor(private readonly notesService: NotesService) {}
 

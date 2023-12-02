@@ -5,9 +5,10 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsersModule } from './users/users.module';
 import { NotesModule } from './notes/notes.module';
-import { APP_FILTER } from '@nestjs/core';
+import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { QueryExceptionFilter } from './common/exception-filters/query-exception.filter';
 import { LoggerMiddleware } from './common/middlewares/logger.middleware';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 
 @Module({
   imports: [
@@ -30,6 +31,29 @@ import { LoggerMiddleware } from './common/middlewares/logger.middleware';
         };
       },
     }),
+    //TODO test this later
+    ThrottlerModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => [
+        {
+          name: 'short',
+          ttl: config.get<number>('SHORT_THROTTLE_TTL'),
+          limit: config.get<number>('SHORT_THROTTLE_LIMIT'),
+        },
+
+        {
+          name: 'medium',
+          ttl: config.get<number>('MEDIUM_THROTTLE_TTL'),
+          limit: config.get<number>('MEDIUM_THROTTLE_LIMIT'),
+        },
+        {
+          name: 'long',
+          ttl: config.get<number>('LONG_THROTTLE_TTL'),
+          limit: config.get<number>('LONG_THROTTLE_LIMIT'),
+        },
+      ],
+    }),
     UsersModule,
     NotesModule,
   ],
@@ -37,6 +61,10 @@ import { LoggerMiddleware } from './common/middlewares/logger.middleware';
   providers: [
     AppService,
     { provide: APP_FILTER, useClass: QueryExceptionFilter },
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
   ],
 })
 export class AppModule implements NestModule {

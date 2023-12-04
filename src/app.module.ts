@@ -8,6 +8,8 @@ import { NotesModule } from './notes/notes.module';
 import { APP_FILTER } from '@nestjs/core';
 import { QueryExceptionFilter } from './common/exception-filters/query-exception.filter';
 import { LoggerMiddleware } from './common/middlewares/logger.middleware';
+import { AuthModule } from './auth/auth.module';
+import { JwtModule } from '@nestjs/jwt';
 
 @Module({
   imports: [
@@ -30,8 +32,20 @@ import { LoggerMiddleware } from './common/middlewares/logger.middleware';
         };
       },
     }),
+    JwtModule.registerAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: async (config: ConfigService) => ({
+        secret: config.get<string>('JWT_SECRET'),
+        signOptions: {
+          expiresIn: '1year',
+          algorithm: 'HS256',
+        },
+      }),
+    }),
     UsersModule,
     NotesModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [

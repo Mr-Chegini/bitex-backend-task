@@ -1,7 +1,9 @@
+import { PartialType } from '@nestjs/mapped-types';
 import { Transform } from 'class-transformer';
 import { IsString, Matches, MaxLength } from 'class-validator';
+import { User } from '../entities/user.entity';
 
-export class RegisterUserDto {
+export class RegisterUserDto extends PartialType(User) {
   @IsString()
   @Transform(({ value }) => value?.trim())
   username: string;

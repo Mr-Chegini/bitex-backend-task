@@ -36,13 +36,27 @@ export class AuthService {
     return { token };
   }
 
+  async verifyToken(token: string): Promise<any> {
+    try {
+      const decoded = await this.jwtService.verifyAsync(token);
+      return decoded;
+    } catch (error) {
+      // Handle token verification errors
+      throw new UnauthorizedException('Invalid token');
+    }
+  }
   async generateAccessToken(user: User): Promise<string> {
-    const payload = {
-      id: user.id,
-      //   isAdmin: user.is_admin,
-    };
+    try {
+      const payload = {
+        id: user.id,
+        //   isAdmin: user.is_admin,
+      };
 
-    const token = await this.jwtService.signAsync(payload);
-    return token;
+      const token = await this.jwtService.signAsync(payload);
+      return token;
+    } catch (err) {
+      console.log('err:', err);
+      // throw new
+    }
   }
 }

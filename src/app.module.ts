@@ -9,7 +9,6 @@ import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { QueryExceptionFilter } from './common/exception-filters/query-exception.filter';
 import { LoggerMiddleware } from './common/middlewares/logger.middleware';
 import { AuthModule } from './auth/auth.module';
-import { JwtModule } from '@nestjs/jwt';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 
 @Module({
@@ -33,16 +32,17 @@ import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
         };
       },
     }),
-    JwtModule.registerAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: async (config: ConfigService) => ({
-        secret: config.get<string>('JWT_SECRET'),
-        signOptions: {
-          expiresIn: '1year',
-          algorithm: 'HS256',
-        },
-      }),
+    // JwtModule.registerAsync({
+    //   imports: [ConfigModule],
+    //   inject: [ConfigService],
+    //   useFactory: async (config: ConfigService) => ({
+    //     secret: config.get<string>('JWT_SECRET'),
+    //     signOptions: {
+    //       expiresIn: '1year',
+    //       algorithm: 'HS256',
+    //     },
+    //   }),
+    // }),
     //TODO test this later
     ThrottlerModule.forRootAsync({
       imports: [ConfigModule],
@@ -82,6 +82,10 @@ import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(LoggerMiddleware).forRoutes('*');
+    consumer
+      .apply(LoggerMiddleware)
+      .forRoutes('*')
+      // .apply(JwtMiddleware)
+      // .forRoutes('*');
   }
 }
